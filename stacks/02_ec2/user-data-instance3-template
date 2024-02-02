@@ -1,0 +1,75 @@
+#!/bin/bash
+wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
+
+echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+
+sudo apt-get update
+
+
+sudo apt-get install -y mongodb-org
+
+echo "mongodb-org hold" | sudo dpkg --set-selections
+echo "mongodb-org-database hold" | sudo dpkg --set-selections
+echo "mongodb-org-server hold" | sudo dpkg --set-selections
+echo "mongodb-mongosh hold" | sudo dpkg --set-selections
+echo "mongodb-org-mongos hold" | sudo dpkg --set-selections
+echo "mongodb-org-tools hold" | sudo dpkg --set-selections
+
+
+sudo systemctl start mongod
+
+
+sudo systemctl enable mongod
+
+sudo apt-get install -y unzip
+
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+echo ' 
+db.createUser(
+  {
+    user: "useradmin",
+    pwd: "Password1!",
+    roles: [ { role: "userAdminAnyDatabase",db: "admin" },{ role: "backup",db: "admin" }  ]
+  }
+)
+' > /home/ubuntu/file_admin.js
+
+echo ' 
+db.createUser(
+{
+    user: "userreader",
+    pwd: "Password1!",
+    roles: [ { role: "read",db: "admin" } ]
+  }
+)
+' > /home/ubuntu/file_reader.js
+
+mongosh admin /home/ubuntu/file_admin.js
+mongosh admin /home/ubuntu/file_reader.js
+
+sudo sh -c 'echo "security:\n  authorization : enabled" >> /etc/mongod.conf'
+sudo sed -i "s,\\(^[[:blank:]]*bindIp:\\) .*,\\1 0.0.0.0," /etc/mongod.conf
+
+sudo systemctl restart mongod
+
+
+
+
+TIMESTAMP=`date +%F-%H%M`
+S3_BUCKET_NAME="tfstate-bucket-umbrella-0000"
+S3_BUCKET_PATH="mongo_backup"
+
+# Create backup
+mongodump -u useradmin -p Password1!
+
+# Add timestamp to backup
+mv dump mongodb-$HOSTNAME-$TIMESTAMP
+tar cf mongodb-$HOSTNAME-$TIMESTAMP.tar mongodb-$HOSTNAME-$TIMESTAMP
+
+# Upload to S3
+aws s3 cp mongodb-$HOSTNAME-$TIMESTAMP.tar s3://$S3_BUCKET_NAME/$S3_BUCKET_PATH/mongodb-$HOSTNAME-$TIMESTAMP.tar
+
+rm -rf mongodb-*

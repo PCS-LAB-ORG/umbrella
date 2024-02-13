@@ -11,9 +11,9 @@ provider aws {
 
 terraform {
   backend "s3" {
-    bucket   = "tfstate-bucket-umbrella-6260"
-    key      = "tfstate/terraform.tfstate-vpc"
-    region   = "us-east-1"
+    bucket = "tfstate-bucket-umbrella-6260"
+    key    = "tfstate/terraform.tfstate-vpc"
+    region = "us-east-1"
 
   }
 }
@@ -25,23 +25,24 @@ terraform {
 
 #VPC
 module "vpc_1" {
-  source = "../../module/vpc"
-  cidr                       = module.variables.vpc_cidrs
-  azs                        = module.variables.az_list
-  public_subnets             = module.variables.public_subnets
-  public_subnet_name         = module.variables.public_subnet_name
-  public_subnet_suffix       = module.variables.public_subnet_suffix
-  compute                    = module.variables.private_subnet_cidrs["compute"]
-  database                   = module.variables.private_subnet_cidrs["database"]
-  short_az_list              = module.variables.short_az_list
-  vpc_name                   = module.variables.vpc_name 
+  source               = "../../module/vpc"
+  cidr                 = module.variables.vpc_cidrs
+  azs                  = module.variables.az_list
+  public_subnets       = module.variables.public_subnets
+  public_subnet_name   = module.variables.public_subnet_name
+  public_subnet_suffix = module.variables.public_subnet_suffix
+  compute              = module.variables.private_subnet_cidrs["compute"]
+  database             = module.variables.private_subnet_cidrs["database"]
+  short_az_list        = module.variables.short_az_list
+  vpc_name             = module.variables.vpc_name
 
 }
 
 resource "aws_default_vpc" "default" {
-	# checkov:skip=CKV_AWS_148: ADD REASON
+  # checkov:skip=CKV_AWS_148: ADD REASON
   tags = {
-    Name = "Default VPC"
+    Name        = "Default VPC"
+    application = "umbrella"
   }
 
   force_destroy = true
@@ -49,7 +50,7 @@ resource "aws_default_vpc" "default" {
 
 
 module "loggroups_vpc_1" {
-  source = "../../module/cloudwatch"
+  source         = "../../module/cloudwatch"
   log_group_name = module.variables.log_group_name
 }
 
@@ -58,6 +59,9 @@ resource "aws_flow_log" "prisma_flow_log" {
   log_destination = module.loggroups_vpc_1.loggroup_arn
   traffic_type    = "ALL"
   vpc_id          = module.vpc_1.vpc_id
+  tags = {
+    application = "umbrella"
+  }
 }
 
 resource "aws_iam_role" "flowlog_role" {
@@ -78,6 +82,9 @@ resource "aws_iam_role" "flowlog_role" {
   ]
 }
 EOF
+  tags = {
+    application = "umbrella"
+  }
 }
 
 resource "aws_iam_role_policy" "flowlog_policy" {

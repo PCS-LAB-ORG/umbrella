@@ -10,9 +10,9 @@ provider aws {
 
 terraform {
   backend "s3" {
-    bucket   = "tfstate-bucket-umbrella-6260"
-    key      = "tfstate/terraform.tfstate-ec2"
-    region   = "us-east-1"
+    bucket = "tfstate-bucket-umbrella-6260"
+    key    = "tfstate/terraform.tfstate-ec2"
+    region = "us-east-1"
 
   }
 }
@@ -23,14 +23,14 @@ terraform {
 
 data "aws_vpc" "myVPC" {
   filter {
-    name = "tag:Name"
+    name   = "tag:Name"
     values = [module.variables.vpc_name]
   }
 }
 
 data "aws_subnet" "my_public_subnet_1" {
   filter {
-    name = "tag:Name"
+    name   = "tag:Name"
     values = ["public-a"]
   }
 }
@@ -38,7 +38,7 @@ data "aws_subnet" "my_public_subnet_1" {
 
 data "aws_subnet" "my_public_subnet_2" {
   filter {
-    name = "tag:Name"
+    name   = "tag:Name"
     values = ["public-b"]
   }
 }
@@ -63,8 +63,11 @@ resource "tls_private_key" "instance" {
 }
 
 resource "aws_key_pair" "instance" {
-  key_name   = module.variables.key_name  
+  key_name   = module.variables.key_name
   public_key = "${tls_private_key.instance.public_key_openssh}"
+  tags = {
+    application = "umbrella"
+  }
 }
 # Save file
 resource "local_file" "ssh_key" {
@@ -86,26 +89,26 @@ resource "aws_security_group" "allow_tls" {
   name        = "allow_tls_ssh"
   description = "Allow TLS & SSH inbound traffic"
   vpc_id      = data.aws_vpc.myVPC.id
-  
-   ingress {
+
+  ingress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = [module.variables.myIP,module.variables.public_subnets[0],module.variables.public_subnets[1]]
+    cidr_blocks = [module.variables.myIP, module.variables.public_subnets[0], module.variables.public_subnets[1]]
   }
 
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = [module.variables.myIP,module.variables.public_subnets[0],module.variables.public_subnets[1]]
+    cidr_blocks = [module.variables.myIP, module.variables.public_subnets[0], module.variables.public_subnets[1]]
   }
 
-   ingress {
+  ingress {
     from_port   = -1
     to_port     = -1
     protocol    = "icmp"
-    cidr_blocks = [module.variables.myIP,module.variables.public_subnets[0],module.variables.public_subnets[1]]
+    cidr_blocks = [module.variables.myIP, module.variables.public_subnets[0], module.variables.public_subnets[1]]
   }
 
   egress {
@@ -115,26 +118,29 @@ resource "aws_security_group" "allow_tls" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  tags = {
+    application = "umbrella"
   }
+}
 
 #Instance 1 
 module "instance_1" {
-  source = "../../module/ec2_instance"
+  source                      = "../../module/ec2_instance"
   name                        = "Instance1"
-  ami_filter                  =  "amzn2-ami-kernel-5.10-hvm-*"
+  ami_filter                  = "amzn2-ami-kernel-5.10-hvm-*"
   instance_type               = "t2.micro"
   subnet_id                   = data.aws_subnet.my_public_subnet_1.id
   key_name                    = aws_key_pair.instance.key_name
   vpc_security_group_ids      = [aws_security_group.allow_tls.id]
   associate_public_ip_address = true
-  user_data = file("./script.sh")
+  user_data                   = file("./script.sh")
   private_ip                  = "10.0.0.11"
 
 }
 
 #Instance 2
 module "instance_2" {
-  source = "../../module/ec2_instance"
+  source                      = "../../module/ec2_instance"
   name                        = "Instance2"
   ami_filter                  = "amzn2-ami-kernel-5.10-hvm-*"
   instance_type               = "t2.micro"
@@ -142,7 +148,7 @@ module "instance_2" {
   key_name                    = aws_key_pair.instance.key_name
   vpc_security_group_ids      = [aws_security_group.allow_tls.id]
   associate_public_ip_address = true
-  user_data = file("./vulnscript.sh")
+  user_data                   = file("./vulnscript.sh")
   private_ip                  = "10.0.1.12"
 
 }
@@ -155,7 +161,7 @@ data "template_file" "user-data-file" {
 }
 
 module "instance_3" {
-  source = "../../module/ec2_instance"
+  source                      = "../../module/ec2_instance"
   name                        = "Instance3-mongoDbServer"
   ami_filter                  = "amzn2-ami-kernel-5.10-hvm-*"
   instance_type               = "t2.micro"
@@ -164,7 +170,7 @@ module "instance_3" {
   vpc_security_group_ids      = [aws_security_group.allow_tls.id]
   associate_public_ip_address = true
   private_ip                  = "10.0.0.13"
-  user_data                   =  "${data.template_file.user-data-file.rendered}"
+  user_data                   = "${data.template_file.user-data-file.rendered}"
 
 }
 
@@ -195,6 +201,7 @@ resource "aws_security_group" "jenkins-sg" {
   tags = {
     "Name"      = "jenkins-sg"
     "Terraform" = "true"
+    application = "umbrella"
   }
 }
 
@@ -202,12 +209,12 @@ resource "aws_security_group" "jenkins-sg" {
 
 
 resource "aws_instance" "jenkins" {
-  ami             = "ami-061dc0582f86ee66b"
- 
-  instance_type   = "t2.micro"
-  subnet_id = data.aws_subnet.my_public_subnet_1.id
-  vpc_security_group_ids  = [aws_security_group.jenkins-sg.id]
-  key_name        = aws_key_pair.instance.key_name
+  ami = "ami-061dc0582f86ee66b"
+
+  instance_type          = "t2.micro"
+  subnet_id              = data.aws_subnet.my_public_subnet_1.id
+  vpc_security_group_ids = [aws_security_group.jenkins-sg.id]
+  key_name               = aws_key_pair.instance.key_name
   provisioner "remote-exec" {
     inline = [
       "curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee  /usr/share/keyrings/jenkins-keyring.asc > /dev/null",
@@ -223,10 +230,11 @@ resource "aws_instance" "jenkins" {
     host        = self.public_ip
     user        = "ubuntu"
     private_key = file("umbrella-instance.pem")
-    agent = false
+    agent       = false
 
   }
   tags = {
-    "Name" = "Jenkins"
+    "Name"      = "Jenkins"
+    application = "umbrella"
   }
 }

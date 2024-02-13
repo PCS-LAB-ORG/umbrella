@@ -1,12 +1,18 @@
 resource "aws_s3_bucket" "tfstate_bucket" {
-  bucket = var.tfstate_bucket_name
+  bucket        = var.tfstate_bucket_name
   force_destroy = var.force_destroy
 
+  tags = {
+    application = "umbrella"
+  }
 }
 
 
 resource "aws_s3_bucket" "tfstate_bucket_log_bucket" {
   bucket = var.tfstate_bucket_name
+  tags = {
+    application = "umbrella"
+  }
 }
 
 
@@ -41,7 +47,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "example" {
 
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm     = var.sse_algorithm
+      sse_algorithm = var.sse_algorithm
     }
   }
 }
@@ -56,9 +62,9 @@ resource "aws_s3_bucket_public_access_block" "default" {
 }
 
 resource "aws_dynamodb_table" "with_server_side_encryption" {
-  name           = var.dynamodb_name
+  name = var.dynamodb_name
   point_in_time_recovery {
-   enabled = true
+    enabled = true
   }
   read_capacity  = var.read_capacity
   write_capacity = var.write_capacity
@@ -77,4 +83,7 @@ resource "aws_dynamodb_table" "with_server_side_encryption" {
     type = "S"
   }
 
+  tags = {
+    application = "umbrella"
+  }
 }

@@ -34,11 +34,12 @@ resource "aws_vpc" "this" {
   assign_generated_ipv6_cidr_block = var.enable_ipv6
 
   tags = {
-    
-      "Name" = var.vpc_name
-    }
-    
-  
+
+    "Name"      = var.vpc_name
+    application = "umbrella"
+  }
+
+
 }
 
 
@@ -70,7 +71,9 @@ resource "aws_vpc_dhcp_options" "this" {
       "Name" = format("%s", var.name)
     },
     var.dhcp_options_tags,
-  )
+    {
+      application = "umbrella"
+  })
 }
 
 ###############################
@@ -97,13 +100,18 @@ resource "aws_internet_gateway" "this" {
       "Name" = format("%s", var.name)
     },
     var.igw_tags,
-  )
+    {
+      application = "umbrella"
+  })
 }
 
 resource "aws_egress_only_internet_gateway" "this" {
   count = var.create_vpc && var.enable_ipv6 && local.max_subnet_length > 0 ? 1 : 0
 
   vpc_id = local.vpc_id
+  tags = {
+    application = "umbrella"
+  }
 }
 
 
@@ -121,7 +129,9 @@ resource "aws_route_table" "public" {
       "Name" = format("rt-%s-${var.public_subnet_suffix}", var.name)
     },
     var.public_route_table_tags,
-  )
+    {
+      application = "umbrella"
+  })
 }
 
 resource "aws_route" "public_internet_gateway" {
@@ -165,7 +175,9 @@ resource "aws_route_table" "private" {
       )
     },
     var.private_route_table_tags,
-  )
+    {
+      application = "umbrella"
+  })
 
   lifecycle {
     # When attaching VPN gateways it is common to define aws_vpn_gateway_route_propagation
@@ -188,7 +200,9 @@ resource "aws_route_table" "compute" {
       "Name" = "rt-${var.name}-${var.compute_subnet_suffix}"
     },
     var.compute_route_table_tags,
-  )
+    {
+      application = "umbrella"
+  })
 }
 
 #######################
@@ -205,7 +219,9 @@ resource "aws_route_table" "database" {
       "Name" = "rt-${var.name}-${var.database_subnet_suffix}"
     },
     var.database_route_table_tags,
-  )
+    {
+      application = "umbrella"
+  })
 }
 
 ################
@@ -223,7 +239,8 @@ resource "aws_subnet" "public" {
   ipv6_cidr_block = var.enable_ipv6 && length(var.public_subnet_ipv6_prefixes) > 0 ? cidrsubnet(aws_vpc.this[0].ipv6_cidr_block, 8, var.public_subnet_ipv6_prefixes[count.index]) : null
 
   tags = {
-    Name = "public${var.public_subnet_name}-${var.short_az_list[count.index]}"
+    Name        = "public${var.public_subnet_name}-${var.short_az_list[count.index]}"
+    application = "umbrella"
   }
 }
 
@@ -252,21 +269,24 @@ resource "aws_subnet" "private" {
       )
     },
     var.private_subnet_tags,
-  )
+    {
+      application = "umbrella"
+  })
 }
 
 #####################
 # Compute subnet
 #####################
 
-resource  "aws_subnet" "compute" {
-  count =  length(var.compute) > 0 ? length(var.compute) : 0
+resource "aws_subnet" "compute" {
+  count = length(var.compute) > 0 ? length(var.compute) : 0
 
-  vpc_id =  local.vpc_id
-  availability_zone               = element(var.azs, count.index)
-  cidr_block                      = var.compute[count.index]
+  vpc_id            = local.vpc_id
+  availability_zone = element(var.azs, count.index)
+  cidr_block        = var.compute[count.index]
   tags = {
-    Name = "compute-${var.short_az_list[count.index]}"
+    Name        = "compute-${var.short_az_list[count.index]}"
+    application = "umbrella"
   }
 }
 
@@ -274,14 +294,15 @@ resource  "aws_subnet" "compute" {
 # Database subnet
 #####################
 
-resource  "aws_subnet" "database" {
-  count =  length(var.database) > 0 ? length(var.database) : 0
+resource "aws_subnet" "database" {
+  count = length(var.database) > 0 ? length(var.database) : 0
 
-  vpc_id = local.vpc_id
-  availability_zone               = element(var.azs, count.index)
-  cidr_block                      = var.database[count.index]
+  vpc_id            = local.vpc_id
+  availability_zone = element(var.azs, count.index)
+  cidr_block        = var.database[count.index]
   tags = {
-    Name = "database-${var.short_az_list[count.index]}"
+    Name        = "database-${var.short_az_list[count.index]}"
+    application = "umbrella"
   }
 }
 
@@ -328,7 +349,9 @@ resource "aws_default_network_acl" "this" {
       "Name" = format("%s", var.default_network_acl_name)
     },
     var.default_network_acl_tags,
-  )
+    {
+      application = "umbrella"
+  })
 
   lifecycle {
     ignore_changes = [subnet_ids]
@@ -350,7 +373,9 @@ resource "aws_network_acl" "public" {
       "Name" = format("%s-${var.public_subnet_suffix}", var.name)
     },
     var.public_acl_tags,
-  )
+    {
+      application = "umbrella"
+  })
 }
 
 resource "aws_network_acl_rule" "public_inbound" {
@@ -402,7 +427,9 @@ resource "aws_network_acl" "private" {
       "Name" = format("%s-${var.private_subnet_suffix}", var.name)
     },
     var.private_acl_tags,
-  )
+    {
+      application = "umbrella"
+  })
 }
 
 resource "aws_network_acl_rule" "private_inbound" {
@@ -454,7 +481,9 @@ resource "aws_network_acl" "database" {
       "Name" = format("%s-${var.database_subnet_suffix}", var.name)
     },
     var.database_acl_tags,
-  )
+    {
+      application = "umbrella"
+  })
 }
 
 resource "aws_network_acl_rule" "database_inbound" {
@@ -526,7 +555,9 @@ resource "aws_eip" "nat" {
       )
     },
     var.nat_eip_tags,
-  )
+    {
+      application = "umbrella"
+  })
 }
 
 resource "aws_nat_gateway" "this" {
@@ -551,7 +582,9 @@ resource "aws_nat_gateway" "this" {
       )
     },
     var.nat_gateway_tags,
-  )
+    {
+      application = "umbrella"
+  })
 
   depends_on = [aws_internet_gateway.this]
 }
@@ -630,7 +663,9 @@ resource "aws_vpn_gateway" "this" {
       "Name" = format("%s", var.name)
     },
     var.vpn_gateway_tags,
-  )
+    {
+      application = "umbrella"
+  })
 }
 
 resource "aws_vpn_gateway_attachment" "this" {
@@ -683,7 +718,9 @@ resource "aws_default_vpc" "this" {
       "Name" = format("%s", var.default_vpc_name)
     },
     var.default_vpc_tags,
-  )
+    {
+      application = "umbrella"
+  })
 }
 
 

@@ -10,9 +10,9 @@ provider aws {
 
 terraform {
   backend "s3" {
-    bucket   = "tfstate-bucket-umbrella-6260"
-    key      = "tfstate/terraform.tfstate-eks"
-    region   = "us-east-1"
+    bucket = "tfstate-bucket-umbrella-6260"
+    key    = "tfstate/terraform.tfstate-eks"
+    region = "us-east-1"
 
   }
 }
@@ -20,15 +20,15 @@ terraform {
 
 data "aws_subnet" "my_public_subnet_1" {
   filter {
-    name = "tag:Name"
+    name   = "tag:Name"
     values = ["public-a"]
   }
 }
 
 
 data "aws_subnet" "my_public_subnet_2" {
-    filter {
-    name = "tag:Name"
+  filter {
+    name   = "tag:Name"
     values = ["public-b"]
   }
 }
@@ -53,6 +53,9 @@ resource "aws_eks_cluster" "Umbrella-EKS-Cluster" {
     endpoint_public_access  = "true"
     public_access_cidrs     = ["0.0.0.0/0"]
     subnet_ids              = [data.aws_subnet.my_public_subnet_1.id, data.aws_subnet.my_public_subnet_2.id]
+  }
+  tags = {
+    application = "umbrella"
   }
 }
 
@@ -84,6 +87,9 @@ resource "aws_iam_policy" "Umbrella-eksWorkNodeEBSPolicy" {
   ]
 }
 POLICY
+  tags = {
+    application = "umbrella"
+  }
 }
 
 resource "aws_iam_policy" "Umbrella-MongoDBPolicy" {
@@ -103,6 +109,9 @@ resource "aws_iam_policy" "Umbrella-MongoDBPolicy" {
   "Version": "2012-10-17"
 }
 POLICY
+  tags = {
+    application = "umbrella"
+  }
 }
 
 resource "aws_iam_role" "Umbrella-AmazonEKSNodeRole" {
@@ -122,10 +131,13 @@ resource "aws_iam_role" "Umbrella-AmazonEKSNodeRole" {
 POLICY
 
   description          = "Allows EC2 instances to call AWS services on your behalf."
-  managed_policy_arns  = ["arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly", "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy", "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy","${aws_iam_policy.Umbrella-eksWorkNodeEBSPolicy.arn}"]
+  managed_policy_arns  = ["arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly", "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy", "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy", "${aws_iam_policy.Umbrella-eksWorkNodeEBSPolicy.arn}"]
   max_session_duration = "3600"
   name                 = "AmazonEKSNodeRole-umbrella-6260"
   path                 = "/"
+  tags = {
+    application = "umbrella"
+  }
 }
 
 resource "aws_iam_role" "Umbrella-AmazonEKSClusterRole" {
@@ -149,6 +161,9 @@ POLICY
   max_session_duration = "3600"
   name                 = "AmazonEKSClusterRole-umbrella-6260"
   path                 = "/"
+  tags = {
+    application = "umbrella"
+  }
 }
 
 resource "aws_iam_role" "Umbrella-MongoDBRole" {
@@ -168,10 +183,13 @@ resource "aws_iam_role" "Umbrella-MongoDBRole" {
 POLICY
 
   description          = "Allows EC2 instances to call AWS services on your behalf."
-  managed_policy_arns  = [aws_iam_policy.Umbrella-MongoDBPolicy.arn,"arn:aws:iam::aws:policy/AmazonS3FullAccess"]
+  managed_policy_arns  = [aws_iam_policy.Umbrella-MongoDBPolicy.arn, "arn:aws:iam::aws:policy/AmazonS3FullAccess"]
   max_session_duration = "3600"
   name                 = "MongoDBRole-umbrella-6260"
   path                 = "/"
+  tags = {
+    application = "umbrella"
+  }
 }
 
 data "aws_ssm_parameter" "eks_ami_release_version" {
@@ -195,11 +213,14 @@ resource "aws_eks_node_group" "Umbrella-EKS-NodeGrp" {
     min_size     = "1"
   }
 
-  subnet_ids              = [data.aws_subnet.my_public_subnet_1.id, data.aws_subnet.my_public_subnet_2.id]
+  subnet_ids = [data.aws_subnet.my_public_subnet_1.id, data.aws_subnet.my_public_subnet_2.id]
 
   update_config {
     max_unavailable = "1"
   }
 
   version = "1.27"
+  tags = {
+    application = "umbrella"
+  }
 }

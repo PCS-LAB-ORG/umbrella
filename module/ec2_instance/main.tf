@@ -19,7 +19,7 @@ resource "aws_instance" "this" {
   associate_public_ip_address = var.associate_public_ip_address
 
 
-                    
+
 
   #  ipv6_address_count          = "${var.ipv6_address_count}"
   #  ipv6_addresses              = "${var.ipv6_addresses}"
@@ -88,7 +88,9 @@ resource "aws_instance" "this" {
     {
       "Name" = var.instance_count > 1 ? format("%s-%d", var.name, count.index + 1) : var.name
     },
-  )
+    {
+      application = "umbrella"
+  })
   lifecycle {
     # Due to several known issues in Terraform AWS provider related to arguments of aws_instance:
     # (eg, https://github.com/terraform-providers/terraform-provider-aws/issues/2036)
@@ -100,8 +102,8 @@ resource "aws_instance" "this" {
     ]
   }
 
-  
-   provisioner "file" {
+
+  provisioner "file" {
     source      = "./${var.key_name}.pem"
     destination = "/home/ec2-user/${var.key_name}.pem"
 
@@ -112,7 +114,7 @@ resource "aws_instance" "this" {
       host        = self.public_ip
     }
   }
-  
+
   //chmod key 400 on EC2 instance
   provisioner "remote-exec" {
     inline = ["chmod 400 ~/${var.key_name}.pem"]

@@ -43,6 +43,7 @@ resource "aws_default_vpc" "default" {
   tags = {
     Name        = "Default VPC"
     application = "umbrella"
+    yor_trace   = "182e97d7-4752-4b08-b277-3a31861c83e7"
   }
 
   force_destroy = true
@@ -61,6 +62,7 @@ resource "aws_flow_log" "prisma_flow_log" {
   vpc_id          = module.vpc_1.vpc_id
   tags = {
     application = "umbrella"
+    yor_trace   = "6579eb32-360f-41fb-8a4d-1b40eaa7e69f"
   }
 }
 
@@ -84,6 +86,7 @@ resource "aws_iam_role" "flowlog_role" {
 EOF
   tags = {
     application = "umbrella"
+    yor_trace   = "c2d77b83-a75e-4ddc-8fa2-245ab59e926e"
   }
 }
 

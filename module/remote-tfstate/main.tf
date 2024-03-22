@@ -4,6 +4,7 @@ resource "aws_s3_bucket" "tfstate_bucket" {
 
   tags = {
     application = "umbrella"
+    yor_trace   = "54c72490-4708-4cdc-9d42-a9b8a4d44a66"
   }
 }
 
@@ -12,6 +13,7 @@ resource "aws_s3_bucket" "tfstate_bucket_log_bucket" {
   bucket = var.tfstate_bucket_name
   tags = {
     application = "umbrella"
+    yor_trace   = "1217dd7a-5217-4661-843f-4431c3aaabc5"
   }
 }
 
@@ -85,5 +87,6 @@ resource "aws_dynamodb_table" "with_server_side_encryption" {
 
   tags = {
     application = "umbrella"
+    yor_trace   = "651b7179-b3f8-407b-968d-668fbf64e5a1"
   }
 }

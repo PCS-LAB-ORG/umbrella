@@ -26,6 +26,7 @@ resource "aws_cloudformation_stack" "prismacloud_iam_role_stack" {
   template_url = data.prismacloud_aws_cft_generator.prismacloud_account_cft.s3_presigned_cft_url
   tags = {
     application = "umbrella"
+    yor_trace   = "ffce0024-9f78-4a02-8a29-cdbc81263977"
   }
 }
 

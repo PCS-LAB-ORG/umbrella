@@ -56,6 +56,7 @@ resource "aws_eks_cluster" "Umbrella-EKS-Cluster" {
   }
   tags = {
     application = "umbrella"
+    yor_trace   = "1c3138ea-1411-4c99-aefd-fea175168c4c"
   }
 }
 
@@ -89,6 +90,7 @@ resource "aws_iam_policy" "Umbrella-eksWorkNodeEBSPolicy" {
 POLICY
   tags = {
     application = "umbrella"
+    yor_trace   = "8cb99ffb-a56b-42ff-ba6e-fe51af6e5470"
   }
 }
 
@@ -111,6 +113,7 @@ resource "aws_iam_policy" "Umbrella-MongoDBPolicy" {
 POLICY
   tags = {
     application = "umbrella"
+    yor_trace   = "802af0a7-abbc-4dae-97ce-012f1d63bdd9"
   }
 }
 
@@ -137,6 +140,7 @@ POLICY
   path                 = "/"
   tags = {
     application = "umbrella"
+    yor_trace   = "16d42b35-f667-4c27-b0e8-e73be159c8a4"
   }
 }
 
@@ -163,6 +167,7 @@ POLICY
   path                 = "/"
   tags = {
     application = "umbrella"
+    yor_trace   = "8a14cbe2-8184-4418-b16a-de10724cafb2"
   }
 }
 
@@ -189,6 +194,7 @@ POLICY
   path                 = "/"
   tags = {
     application = "umbrella"
+    yor_trace   = "4a52979a-0883-49c4-8a6c-97638be357ee"
   }
 }
 
@@ -222,5 +228,6 @@ resource "aws_eks_node_group" "Umbrella-EKS-NodeGrp" {
   version = "1.27"
   tags = {
     application = "umbrella"
+    yor_trace   = "e589fa46-ca09-43cb-95a5-f8c08c30ce96"
   }
 }

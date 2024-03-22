@@ -90,6 +90,8 @@ resource "aws_instance" "this" {
     },
     {
       application = "umbrella"
+      }, {
+      yor_trace = "c8e0212f-7f4e-477a-b346-e1417c5d137f"
   })
   lifecycle {
     # Due to several known issues in Terraform AWS provider related to arguments of aws_instance:

@@ -67,6 +67,7 @@ resource "aws_key_pair" "instance" {
   public_key = "${tls_private_key.instance.public_key_openssh}"
   tags = {
     application = "umbrella"
+    yor_trace   = "0943b1e3-ae81-45a5-88c9-d0de988f22f4"
   }
 }
 # Save file
@@ -120,6 +121,7 @@ resource "aws_security_group" "allow_tls" {
 
   tags = {
     application = "umbrella"
+    yor_trace   = "5c06d3cd-4b49-4725-90df-06d994190241"
   }
 }
 
@@ -202,6 +204,7 @@ resource "aws_security_group" "jenkins-sg" {
     "Name"      = "jenkins-sg"
     "Terraform" = "true"
     application = "umbrella"
+    yor_trace   = "493c16c0-c36d-4188-b9c0-319099c24a84"
   }
 }
 
@@ -236,5 +239,6 @@ resource "aws_instance" "jenkins" {
   tags = {
     "Name"      = "Jenkins"
     application = "umbrella"
+    yor_trace   = "9ccd0717-46a9-433e-a09b-7c49e9432841"
   }
 }

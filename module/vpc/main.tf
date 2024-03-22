@@ -37,6 +37,7 @@ resource "aws_vpc" "this" {
 
     "Name"      = var.vpc_name
     application = "umbrella"
+    yor_trace   = "f47f1467-4dc8-4300-b455-39964c0931cb"
   }
 
 
@@ -73,6 +74,8 @@ resource "aws_vpc_dhcp_options" "this" {
     var.dhcp_options_tags,
     {
       application = "umbrella"
+      }, {
+      yor_trace = "de540ec8-2765-4738-883c-a144d9d05869"
   })
 }
 
@@ -102,6 +105,8 @@ resource "aws_internet_gateway" "this" {
     var.igw_tags,
     {
       application = "umbrella"
+      }, {
+      yor_trace = "07d4c177-681c-42d4-ad92-8a4e4406911a"
   })
 }
 
@@ -111,6 +116,7 @@ resource "aws_egress_only_internet_gateway" "this" {
   vpc_id = local.vpc_id
   tags = {
     application = "umbrella"
+    yor_trace   = "105a66b2-aa6a-4a8e-b999-8f60e67552a6"
   }
 }
 
@@ -131,6 +137,8 @@ resource "aws_route_table" "public" {
     var.public_route_table_tags,
     {
       application = "umbrella"
+      }, {
+      yor_trace = "b5fba480-7878-44db-a749-a7f563323464"
   })
 }
 
@@ -177,6 +185,8 @@ resource "aws_route_table" "private" {
     var.private_route_table_tags,
     {
       application = "umbrella"
+      }, {
+      yor_trace = "efe7c8df-6e2c-4cbe-ad50-c1fc3256e8dd"
   })
 
   lifecycle {
@@ -202,6 +212,8 @@ resource "aws_route_table" "compute" {
     var.compute_route_table_tags,
     {
       application = "umbrella"
+      }, {
+      yor_trace = "5473303d-d235-4e00-8031-51b25ec7f225"
   })
 }
 
@@ -221,6 +233,8 @@ resource "aws_route_table" "database" {
     var.database_route_table_tags,
     {
       application = "umbrella"
+      }, {
+      yor_trace = "d6a2ceb5-a6be-4eb4-9539-e1c68420e583"
   })
 }
 
@@ -241,6 +255,7 @@ resource "aws_subnet" "public" {
   tags = {
     Name        = "public${var.public_subnet_name}-${var.short_az_list[count.index]}"
     application = "umbrella"
+    yor_trace   = "5e2e547d-7919-4856-b7ad-46a17926bc72"
   }
 }
 
@@ -271,6 +286,8 @@ resource "aws_subnet" "private" {
     var.private_subnet_tags,
     {
       application = "umbrella"
+      }, {
+      yor_trace = "9b982a7e-2326-4fa5-a2f5-7425444eee9d"
   })
 }
 
@@ -287,6 +304,7 @@ resource "aws_subnet" "compute" {
   tags = {
     Name        = "compute-${var.short_az_list[count.index]}"
     application = "umbrella"
+    yor_trace   = "6dd13520-e0f8-4c0e-9fda-48972d28017c"
   }
 }
 
@@ -303,6 +321,7 @@ resource "aws_subnet" "database" {
   tags = {
     Name        = "database-${var.short_az_list[count.index]}"
     application = "umbrella"
+    yor_trace   = "3ec83806-b7ab-4f1a-88f3-2c89631e31e3"
   }
 }
 
@@ -351,6 +370,8 @@ resource "aws_default_network_acl" "this" {
     var.default_network_acl_tags,
     {
       application = "umbrella"
+      }, {
+      yor_trace = "77609d49-01b4-43e8-8afe-69b358d54050"
   })
 
   lifecycle {
@@ -375,6 +396,8 @@ resource "aws_network_acl" "public" {
     var.public_acl_tags,
     {
       application = "umbrella"
+      }, {
+      yor_trace = "01e705dd-54bd-43e3-b9df-4de5b71ec3a7"
   })
 }
 
@@ -429,6 +452,8 @@ resource "aws_network_acl" "private" {
     var.private_acl_tags,
     {
       application = "umbrella"
+      }, {
+      yor_trace = "c16d59ff-5d5c-4409-9824-d9357793569e"
   })
 }
 
@@ -483,6 +508,8 @@ resource "aws_network_acl" "database" {
     var.database_acl_tags,
     {
       application = "umbrella"
+      }, {
+      yor_trace = "c38d262f-6d34-4351-bc0f-01543d2df629"
   })
 }
 
@@ -557,6 +584,8 @@ resource "aws_eip" "nat" {
     var.nat_eip_tags,
     {
       application = "umbrella"
+      }, {
+      yor_trace = "9b8e5f86-aedb-4270-bdc8-909f0a9a982a"
   })
 }
 
@@ -584,6 +613,8 @@ resource "aws_nat_gateway" "this" {
     var.nat_gateway_tags,
     {
       application = "umbrella"
+      }, {
+      yor_trace = "5f04dfd3-5d50-433d-b279-5683e876b519"
   })
 
   depends_on = [aws_internet_gateway.this]
@@ -665,6 +696,8 @@ resource "aws_vpn_gateway" "this" {
     var.vpn_gateway_tags,
     {
       application = "umbrella"
+      }, {
+      yor_trace = "6f97bc48-6c13-4d31-9746-93d7f0956cc5"
   })
 }
 
@@ -720,6 +753,8 @@ resource "aws_default_vpc" "this" {
     var.default_vpc_tags,
     {
       application = "umbrella"
+      }, {
+      yor_trace = "621dd730-a5a0-48c1-87fc-551e9d410346"
   })
 }
 
